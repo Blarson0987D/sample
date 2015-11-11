@@ -196,6 +196,8 @@
     carrierNode.change(function() {
       var _this = this;
       restoreModel();
+      conditionNode.attr('disabled','').val('');
+      finalPrice.text('');
 
       if (manNode.find("option:selected").val() == '19'){
         iphoneResetModelAndCondition(_this.value);
@@ -208,6 +210,7 @@
 
     modelNode.change(function(){
       conditionNode.removeAttr('disabled');
+      finalPrice.text('');
     });
 
     conditionNode.change(function() {
