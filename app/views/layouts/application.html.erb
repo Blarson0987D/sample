@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Motorola</title>
+  <style>
+    #gazelle-div a {color: #558ED5}
+    #gazelle-div #left-bar {width:15%;display:inline-block;vertical-align:top}
+    #gazelle-div #left-bar h1 {color:#558ED5;margin:0}
+    #gazelle-div #left-bar h3 {display: inline-block;color:#558ED5;vertical-align:top}
+    #gazelle-div #left-bar img {width: 30%;}
+    #gazelle-div #right-bar h1 {margin:0}
+    #gazelle-div #right-bar h3 {width: 80%}
+    #gazelle-div #right-bar {width:30%;display:inline-block;vertical-align:top}
+    #gazelle-div #right-bar .body label {width: 30%; padding-right: 50px}
+    #gazelle-div {font-family: 'Trebuchet MS'}
+  </style>
+  <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
+</head>
+<body>
+  <%= yield %>
+</body>
+</html>

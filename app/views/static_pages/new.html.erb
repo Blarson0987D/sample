@@ -1,0 +1,232 @@
+<div id="gazelle-div">
+  <div id='left-bar'>
+    <h1>Trade-in</h1>
+    <h3>Powered by</h3>
+    <img src='http://cdn3.bigcommerce.com/s-ndqvi4q/templates/__custom/images/logo.svg'>
+  </div>
+
+  <div id="right-bar">
+    <div class="title">
+      <h1>Receive Cash Rebate for Trade-in!</h1>
+      <h3>It’s easy. Select the make, model and condition of your old phone. <a href="#">Learn more</a></h3>
+    </div>
+
+    <br>
+    <div class="body">
+      <%= form_tag do %>
+        <table>
+          <tbody>
+            <tr>
+              <td>
+                <label>Manufacturer</label>
+              </td>
+              <td>
+                <select id='gazelleManufacturer' disabled>
+                  <option value="" selected disabled>Select...</option>
+                  <option value='3091'>Motorola</option>
+                  <option value='19'>Apple</option>
+                  <option value='3086'>Blackberry</option>
+                  <option value='3092'>HTC</option>
+                  <option value='3094'>LG</option>
+                  <option value='3095'>Nokia</option>
+                  <option value='3093'>Samsung</option>
+                </select>
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>
+                <label>Carrier</label>
+              </td>
+              <td>
+                <select id='gazelleCarrier' disabled>
+                  <option value="" selected disabled>Select...</option>
+                </select>
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>
+                <label>Model</label>
+              </td>
+              <td>
+                <select id='gazelleModel' disabled>
+                  <option value="" selected disabled>Select...</option>
+                </select>
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>
+                <label>Condition</label>
+              </td>
+              <td>
+                <select id='gazelleCondition' disabled>
+                  <option value="" selected disabled>Select...</option>
+                  <option value="Cracked&8751=26506">Broken And Screen Doesn't Power On</option>
+                  <option value="Cracked&8751=26505">Broken But Screen Powers On</option>
+                  <option value="Good">Good</option>
+                  <option value="Flawless">Flawless</option>
+                </select>
+                <input type='submit' class="btn" value="Add to cart">
+              </td>
+              <td id='finalPrice'><h1></h1></td>
+            </tr>
+            <tr>
+              <td>
+                <a href="#">Don't see your device?</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      <% end %>
+    </div>
+  </div>
+
+  <%= yield %>
+</div>
+<script>
+  carrierNames = ['AT&T', 'T-Mobile', 'unlocked', 'sprint', 'verizon']
+
+  function restoreAllChildren() {
+    restoreCarrier();
+    restoreModel();
+    modelNode.attr('disabled','');
+    conditionNode.attr('disabled','').val('');
+    finalPrice.text('');
+  }
+
+  function restoreCarrier() {
+    carrierNode.children().remove();
+    carrierNode.append(
+      '<option value="" selected disabled>Select...</option>'
+    );
+  }
+
+  function restoreModel() {
+    modelNode.children().remove();
+    modelNode.append(
+      '<option value="" selected disabled>Select...</option>'
+    );
+  }
+
+  function resetSelectBoxes(value) {
+    carriers = {};
+    models = {};
+    $("#gazelleCarrier").removeAttr('disabled');
+
+    if (value == '19') { // iPhone
+      var phones = phone_list.iphone.values;
+      $.each(phones, function(i,v) {
+        if (v.name.match(/iphone/i)){
+          models[i] = v;
+        } else {
+          carriers[i] = v;
+        }
+      });
+
+    } else {
+      var phones = phone_list.cell_phone.values;
+      manVal = manNode.find("option:selected").text().toLowerCase();
+      $.each(phones, function(i,v) {
+        if (carrierNames.indexOf(v.name) > -1){
+          carriers[i] = v;
+        } else if (manVal.match(new RegExp(v.name, 'i'))){
+          models[i] = v;
+        }
+      });
+    }
+    $.each(carriers, function(i,v) {
+      carrierNode.append(
+        '<option value="' + i + '" data-internal_name="' + v.internal_name + '">' + v.name + '</option>'
+      );
+    });
+  }
+
+  function iphoneResetModelAndCondition(value) {
+    $.each(models, function(i,v) {
+      var k = phone_list.iphone.nodes[i + '/' + value];
+      $.each(k.products, function(n,m) {
+        modelNode.append(
+          '<option value="' + m.id + '" data-url="' + m.url + '">' + phone_list.iphone.products[m.id].name + '</option>'
+        );
+      });
+    });
+  }
+
+  function resetModelAndCondition(value) {
+    $.each(models, function(i,v) {
+      var k = phone_list.cell_phone.nodes[i + '/' + value];
+      $.each(k.products, function(n,m) {
+        modelNode.append(
+          '<option value="' + m.id + '" data-url="' + m.url + '">' + phone_list.cell_phone.products[m.id].name + '</option>'
+        );
+      });
+    });
+  }
+
+  $(document).ready(function() {
+    manNode = $('#gazelleManufacturer');
+    carrierNode = $('#gazelleCarrier');
+    modelNode = $('#gazelleModel');
+    conditionNode = $('#gazelleCondition');
+    finalPrice = $('#finalPrice h1');
+
+    $.ajax({
+      url: 'https://www.gazelle.com/stacks/cell_phone.json',
+      success: function(data) {
+        phone_list = data;
+        $.ajax({
+          url: 'https://www.gazelle.com/stacks/iphone.json',
+          success: function(data) {
+            phone_list = $.extend({}, phone_list, data);
+            manNode.removeAttr('disabled');
+          }
+        });
+      }
+    });
+
+    manNode.change(function() {
+      var _this = this;
+
+      restoreAllChildren();
+      resetSelectBoxes(_this.value);
+    });
+
+    carrierNode.change(function() {
+      var _this = this;
+      restoreModel();
+
+      if (manNode.find("option:selected").val() == '19'){
+        iphoneResetModelAndCondition(_this.value);
+      } else {
+        resetModelAndCondition(_this.value);
+      }
+
+      modelNode.removeAttr('disabled');
+    });
+
+    modelNode.change(function(){
+      conditionNode.removeAttr('disabled');
+    });
+
+    conditionNode.change(function() {
+      var _this = this;
+      'Cracked&8751=26506' // No power Cracked
+      'Cracked&8751=26505' // Power cracked
+      'Good' // Good
+      'Flawless' // Flawless
+      $.ajax({
+        url: ('https://m.gazelletesting.com/products/' + modelNode.val() + '/calculation?simple_condition=' + _this.value),
+        success: function(data) {
+          finalPrice.text('$' + data.calculation.estimated_value);
+        },
+        error: function(data){
+          console.log('error');
+          console.log(data);
+        }
+
+      })
+    });
+  });
+</script>
