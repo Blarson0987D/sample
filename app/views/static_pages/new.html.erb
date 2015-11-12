@@ -215,10 +215,8 @@
 
     conditionNode.change(function() {
       var _this = this;
-      'Cracked&8751=26506' // No power Cracked
-      'Cracked&8751=26505' // Power cracked
-      'Good' // Good
-      'Flawless' // Flawless
+      finalPrice.text('');
+
       $.ajax({
         url: ('https://m.gazelletesting.com/products/' + modelNode.val() + '/calculation?simple_condition=' + _this.value),
         success: function(data) {
