@@ -23,11 +23,11 @@
               <td>
                 <select id='gazelleManufacturer' disabled>
                   <option value="" selected disabled>Select...</option>
-                  <option value='3091'>Motorola</option>
                   <option value='19'>Apple</option>
                   <option value='3086'>Blackberry</option>
                   <option value='3092'>HTC</option>
                   <option value='3094'>LG</option>
+                  <option value='3091'>Motorola</option>
                   <option value='3095'>Nokia</option>
                   <option value='3093'>Samsung</option>
                 </select>
@@ -63,8 +63,8 @@
               <td>
                 <select id='gazelleCondition' disabled>
                   <option value="" selected disabled>Select...</option>
-                  <option value="Cracked&8751=26506">Broken And Screen Doesn't Power On</option>
-                  <option value="Cracked&8751=26505">Broken But Screen Powers On</option>
+                  <option value="Cracked&8751=26506">Broken - Doesn't Power On</option>
+                  <option value="Cracked&8751=26505">Broken - Powers On</option>
                   <option value="Good">Good</option>
                   <option value="Flawless">Flawless</option>
                 </select>
@@ -82,8 +82,7 @@
       <% end %>
     </div>
   </div>
-
-  <%= yield %>
+  <img src="http://www.leumit.co.il/minisites/personalcare/content/images/loader01.gif" style="width:1px;height:1px;">
 </div>
 <script>
   carrierNames = ['AT&T', 'T-Mobile', 'unlocked', 'sprint', 'verizon']
@@ -93,7 +92,7 @@
     restoreModel();
     modelNode.attr('disabled','');
     conditionNode.attr('disabled','').val('');
-    finalPrice.text('');
+    finalPrice.html('');
   }
 
   function restoreCarrier() {
@@ -136,9 +135,9 @@
         }
       });
     }
-    $.each(carriers, function(i,v) {
+    $.each(alphabetical_sort_object_of_objects(carriers,'name'), function(i,v) {
       carrierNode.append(
-        '<option value="' + i + '" data-internal_name="' + v.internal_name + '">' + v.name + '</option>'
+        '<option value="' + Object.keys(v)[0] + '" >' + v[Object.keys(v)[0]] + '</option>'
       );
     });
   }
@@ -163,6 +162,45 @@
         );
       });
     });
+  }
+
+  function toTitleCase(str) {
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1);});
+  }
+
+  function alphabetical_sort_object_of_objects(data, attr) {
+    var arr = [];
+    for (var prop in data) {
+        if (data.hasOwnProperty(prop)) {
+            var obj = {};
+            obj[prop] = data[prop];
+            obj.tempSortName = data[prop][attr].toLowerCase();
+            arr.push(obj);
+        }
+    }
+
+    arr.sort(function(a, b) {
+        var at = a.tempSortName,
+            bt = b.tempSortName;
+        return at > bt ? 1 : ( at < bt ? -1 : 0 );
+    });
+
+    var result = [];
+    for (var i=0, l=arr.length; i<l; i++) {
+        var obj = arr[i];
+        delete obj.tempSortName;
+        for (var prop in obj) {
+            if (obj.hasOwnProperty(prop)) {
+                var id = prop;
+            }
+        }
+        var item = {};
+        item[id] = toTitleCase(obj[id].name);
+        result.push(item);
+    }
+    result.splice(1,1);
+    result.push({3107: 'Other'});
+    return result;
   }
 
   $(document).ready(function() {
@@ -197,7 +235,7 @@
       var _this = this;
       restoreModel();
       conditionNode.attr('disabled','').val('');
-      finalPrice.text('');
+      finalPrice.html('');
 
       if (manNode.find("option:selected").val() == '19'){
         iphoneResetModelAndCondition(_this.value);
@@ -209,24 +247,24 @@
     });
 
     modelNode.change(function(){
-      conditionNode.removeAttr('disabled');
-      finalPrice.text('');
+      conditionNode.removeAttr('disabled').val('');
+      finalPrice.html('');
     });
 
     conditionNode.change(function() {
       var _this = this;
-      'Cracked&8751=26506' // No power Cracked
-      'Cracked&8751=26505' // Power cracked
-      'Good' // Good
-      'Flawless' // Flawless
+      finalPrice.html('<img src="http://www.leumit.co.il/minisites/personalcare/content/images/loader01.gif" style="height:30px;width:30px">');
+
       $.ajax({
-        url: ('https://m.gazelletesting.com/products/' + modelNode.val() + '/calculation?simple_condition=' + _this.value),
+        url: ('https://m.gazelle.com/products/' + modelNode.val() + '/calculation?simple_condition=' + _this.value),
         success: function(data) {
+          finalPrice.html('');
           finalPrice.text('$' + data.calculation.estimated_value);
         },
         error: function(data){
           console.log('error');
           console.log(data);
+          finalPrice.text('Error getting the price.');
         }
 
       })

@@ -32,6 +32,7 @@ gem 'pg'
 # gem 'capistrano-rails', group: :development
 
 group :development, :test do
+  gem 'sqlite3'
   # Call 'debugger' anywhere in the code to stop execution and get a debugger console
   gem 'debugger'
 
